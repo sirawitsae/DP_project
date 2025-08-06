@@ -1,0 +1,50 @@
+{
+    "files": {
+       "wjets": {
+            "sampletype": "background",
+            "filepath": "/Users/sirawitsae/Desktop/project/DarkPhoton/vbfljetskim/wjets_strong_sh227.root",
+            "treename": "miniT",
+            "colour": "17",
+            "blind": "False",
+            "scalefactor": 1, 
+            "unitynorm": "True",
+            "includeweights": "scale1fb*intLumi",
+            "excludeweights": ""
+        },
+      "Sig: 0.1 GeV": {
+            "sampletype": "signal",
+            "filepath": "/Users/sirawitsae/Desktop/project/DarkPhoton/vbfljetskim/frvz_vbf_500757.root",
+            "treename": "miniT",
+            "colour": "1",
+            "blind": "False",
+            "unitynorm": "True",
+            "scalefactor": 1,
+            "includeweights": "scale1fb*intLumi",
+            "excludeweights": ""
+      },
+        "Sig: 0.4 GeV": {
+            "sampletype": "signal",
+            "filepath": "/Users/sirawitsae/Desktop/project/DarkPhoton/vbfljetskim/frvz_vbf_500758.root",
+            "treename": "miniT",
+            "colour": "2",
+            "blind": "False",
+            "unitynorm": "True",
+            "scalefactor": 1,
+            "includeweights": "scale1fb*intLumi",
+            "excludeweights": ""
+        },
+        "Sig: 15 GeV": {
+            "sampletype": "signal",
+            "filepath": "/Users/sirawitsae/Desktop/project/DarkPhoton/vbfljetskim/frvz_vbf_500761.root",
+            "treename": "miniT",
+            "colour": "3",
+            "blind": "False",
+            "unitynorm": "True",
+            "scalefactor": 1,
+            "includeweights": "scale1fb*intLumi",
+            "excludeweights": ""
+        }
+ 
+
+    }
+}
