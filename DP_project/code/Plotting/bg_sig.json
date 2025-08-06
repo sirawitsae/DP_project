@@ -1,0 +1,28 @@
+{
+    "files": {
+       "BG": {
+            "sampletype": "background",
+            "filepath": "/Users/sirawitsae/Desktop/project/DarkPhoton/vbfljetskim/wjets_strong_sh227.root",
+            "treename": "miniT",
+            "colour": "17",
+            "blind": "False",
+            "scalefactor": 1, 
+            "unitynorm": "True",
+            "includeweights": "scale1fb*intLumi",
+            "excludeweights": ""
+        },
+      "Sig": {
+            "sampletype": "signal",
+            "filepath": "/Users/sirawitsae/Desktop/project/DarkPhoton/vbfljetskim/train_data.root",
+            "treename": "miniT",
+            "colour": "2",
+            "blind": "False",
+            "unitynorm": "True",
+            "scalefactor": 1,
+            "includeweights": "scale1fb*intLumi",
+            "excludeweights": ""
+        }
+ 
+
+    }
+}
