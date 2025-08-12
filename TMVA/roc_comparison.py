@@ -13,8 +13,8 @@ from ROOT import TFile, TTree, TH1F, TGraph, TCanvas, TLegend, kBlue, kRed, kBla
 from array import array
 import argparse, os
 
-sig_filename = "/Users/sirawitsae/Desktop/project/hep-python/TMVA/applyweight_500761/frvz_vbf_500761.root"
-bkg_filename = "/Users/sirawitsae/Desktop/project/hep-python/TMVA/applyweight_wjets/wjets_strong_sh227.root"
+sig_filename = "/Users/sirawitsae/Desktop/project/hep-python/TMVA/output_AD/applyweight_64/frvz_vbf_500764.root"
+bkg_filename = "/Users/sirawitsae/Desktop/project/hep-python/TMVA/output_AD/applyweight_64/wjets_strong_sh227.root"
 
 def get_roc(x, y, sig_filename, bkg_filename, treename, cut_string, weight_string, variable_name, nBins, xMin, xMax, left_cut=False):
 
@@ -39,9 +39,9 @@ def get_roc(x, y, sig_filename, bkg_filename, treename, cut_string, weight_strin
     #print(h_sig.Integral())
 
     for bin in range(nBins):
-        eff = h_sig.Integral(bin, nBins+1) / h_sig.Integral(0, nBins+1)
+        eff = h_sig.Integral(bin, nBins+1) / h_sig.Integral(0, nBins+1) if h_sig.Integral(0, nBins+1) > 0 else 0
         if left_cut:
-            eff = h_sig.Integral(0, bin) / h_sig.Integral(0, nBins+1)
+            eff = h_sig.Integral(0, bin) / h_sig.Integral(0, nBins+1) if h_sig.Integral(0, nBins+1) > 0 else 0
         #print(bin, h_sig.GetBinContent(bin), eff)
         x.append(eff)
     sig_tfile.Close()
@@ -67,9 +67,9 @@ def get_roc(x, y, sig_filename, bkg_filename, treename, cut_string, weight_strin
     #print(h_bkg.Integral())
 
     for bin in range(nBins):
-        eff = h_bkg.Integral(bin, nBins+1) / h_bkg.Integral(0, nBins+1)
+        eff = h_bkg.Integral(bin, nBins+1) / h_bkg.Integral(0, nBins+1) if h_bkg.Integral(0, nBins+1) > 0 else 0
         if left_cut:
-            eff = h_bkg.Integral(0, bin) / h_bkg.Integral(0, nBins+1)
+            eff = h_bkg.Integral(0, bin) / h_bkg.Integral(0, nBins+1) if h_bkg.Integral(0, nBins+1) > 0 else 0
         #print(bin, h_bkg.GetBinContent(bin), eff)
         y.append(1-eff)
     bkg_tfile.Close()
@@ -99,36 +99,49 @@ def main():
 
     treename = "miniT"
     weight_string = 'scale1fb'
-    cut_string = 'nLJjets20>0&&LJjet1_pt>20e3&&LJjet1_gapRatio>0.9&&LJjet1_EMfrac<0.4'
+    base_cut_string = 'nLJjets20>0&&LJjet1_pt>20e3&&LJjet1_gapRatio>0.9&&LJjet1_EMfrac<0.4'
 
     # roc curve for two variables
     nbins = 200
-    var1 = 'LJjet1_DPJtagger';  x1_min = -1;     x1_max = 1
+    var1 = 'LJjet1_DPJtagger';  x1_min = 0;     x1_max = 1
     x_var1, y_var1 = array( 'd' ), array( 'd' )
-    get_roc(x_var1, y_var1, sig_filename, bkg_filename, treename, cut_string, weight_string, var1, nbins, x1_min, x1_max) 
+    get_roc(x_var1, y_var1, sig_filename, bkg_filename, treename, base_cut_string, weight_string, var1, nbins, x1_min, x1_max) 
+    
     var2 = 'LJjet1_BDT';  x2_min = -1;     x2_max = 1
     x_var2, y_var2 = array( 'd' ), array( 'd' )
-    get_roc(x_var2, y_var2, sig_filename, bkg_filename, treename, cut_string, weight_string, var2, nbins, x2_min, x2_max)
+    get_roc(x_var2, y_var2, sig_filename, bkg_filename, treename, base_cut_string, weight_string, var2, nbins, x2_min, x2_max)
+    
+    # --- MODIFICATION: Add the isTest==1 cut for the mse variable ---
+    var3 = 'mse';  x3_min = 0;     x3_max = 12.
+    cut_string_mse = base_cut_string + '&&isTest==1' # Append the new condition
+    x_var3, y_var3 = array( 'd' ), array( 'd' )
+    get_roc(x_var3, y_var3, sig_filename, bkg_filename, treename, cut_string_mse, weight_string, var3, nbins, x3_min, x3_max)
 
 
     # create new file to store the ROC curves 
     os.system('mkdir -p ' + args.op_dir)
-    op_tfile = TFile(args.op_dir +"/roc_curve.root", "recreate")
+    op_tfile = TFile(args.op_dir +"/roc_curve_64.root", "recreate")
 
     # create graph for LJjet1 CNN 
     gr_var1 = TGraph( len(x_var1), x_var1, y_var1 )
     setstyle(gr_var1, var1,  kBlack)
     gr_var1.Write()
 
-    # create graph for LJjet1 
+    # create graph for BDT
     gr_var2 = TGraph( len(x_var2), x_var2, y_var2 )
     setstyle(gr_var2, var2,  kRed)
     gr_var2.Write()
+
+    # create graph for mse
+    gr_var3 = TGraph( len(x_var3), x_var3, y_var3 )
+    setstyle(gr_var3, var3,  kBlue)
+    gr_var3.Write()
 
     # make overlay plots 
     canvas = TCanvas( 'canvas', 'ROC curve')
     gr_var2.Draw()
     gr_var1.Draw("same")
+    gr_var3.Draw("same")
 
     # define the location of the legend
     x0, x1, y0, y1 = 0.20, 0.60, 0.30, 0.60
@@ -139,11 +152,12 @@ def main():
     legend.SetFillColor(0)
     legend.SetFillStyle(0)
     legend.SetLineColor(0)  
+    legend.AddEntry(gr_var3, var3, 'l')
     legend.AddEntry(gr_var2, var2,  'l')
     legend.AddEntry(gr_var1, var1, 'l')
     legend.Draw()
 
-    canvas.SaveAs(args.op_dir + '/roc_curve.png')
+    canvas.SaveAs(args.op_dir + '/roc_curve_64.png')
 
     op_tfile.Close()
 
